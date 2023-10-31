@@ -1,0 +1,15 @@
+WHENEVER SQLERROR EXIT FAILURE;
+set serveroutput on;
+begin
+  dbms_output.enable(10000);
+  for gen_sql_command in (select 'purge table '||owner||'."'||OBJECT_NAME||'"' sql_command
+  from dba_recyclebin 
+  where type='TABLE' and to_date(droptime,'YYYY-MM-DD:HH24:MI:SS')<sysdate-3)
+  loop
+        dbms_output.put_line( gen_sql_command.sql_command);
+	execute immediate gen_sql_command.sql_command;
+  end loop;
+  commit;
+end;
+/
+
